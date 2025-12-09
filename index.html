@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Christmas at Hogwarts: The Keeper's Quest</title>
+    <style>
+        /* CSS STYLES - THE MAGIC VISUALS */
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Lato:wght@400;700&display=swap');
+
+        :root {
+            --gold: #d4af37;
+            --bg: #0f0f0f;
+            --parchment: #fcf5e5;
+            --footer-height: 60px;
+            --correct: #4caf50;
+            --wrong: #f44336;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--parchment);
+            font-family: 'Lato', sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-image: radial-gradient(circle at 50% 50%, #1a1a1a 0%, #000 100%);
+            box-sizing: border-box;
+            padding-bottom: var(--footer-height);
+        }
+
+        /* Main Game Container */
+        .container {
+            max-width: 800px;
+            width: 95%;
+            background: rgba(20, 20, 20, 0.9);
+            border: 2px solid var(--gold);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 0 20px var(--gold);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            min-height: 500px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        /* STAGE SPECIFIC BACKGROUNDS */
+        #stage-0, #stage-7 {
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            box-shadow: inset 0 0 0 2000px rgba(0, 0, 0, 0.6); 
+            height: 100%;
+            width: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        #stage-0 { background-image: url('image_0.png'); }
+        #stage-7 { background-image: url('image_2.png'); }
+
+        h1, h2, h3 {
+            font-family: 'Cinzel', serif;
+            color: var(--gold);
+            text-shadow: 2px 2px 4px #000;
+            margin-top: 0;
+        }
+
+        .hidden { display: none !important; }
+        .fade-in { animation: fadeIn 0.8s; }
+        .disabled { pointer-events: none; opacity: 0.6; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Standard Buttons */
+        .btn {
+            background: linear-gradient(45deg, #333, #555);
+            border: 1px solid var(--gold);
+            color: var(--gold);
+            padding: 12px 24px;
+            font-family: 'Cinzel', serif;
+            font-size: 1.1em;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s;
+            border-radius: 5px;
+        }
+
+        .btn:hover {
+            background: var(--gold);
+            color: #000;
+            box-shadow: 0 0 15px var(--gold);
+        }
+        
+        .hint-btn {
+            padding: 8px 16px;
+            font-size: 0.9em;
+            background: #222;
+        }
+
+        /* --- Companion Cards --- */
+        .card-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .companion-card {
+            border: 1px solid var(--gold);
+            padding: 15px;
+            width: 150px;
+            cursor: pointer;
+            transition: transform 0.3s;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 220px;
+        }
+
+        .companion-card:hover { transform: scale(1.05); background: rgba(212, 175, 55, 0.1); }
+
+        .companion-img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #555;
+        }
+        
+        .companion-card h3 { margin: 5px 0; font-size: 1.2em; }
+        .companion-card p { margin: 0; font-size: 0.9em; color: #ccc; }
+
+        input[type="text"] {
+            padding: 10px;
+            border: 1px solid var(--gold);
+            background: #222;
+            color: white;
+            font-family: 'Lato', sans-serif;
+            width: 60%;
+            text-align: center;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        .correct-text { color: var(--correct); font-weight: bold; }
+        .wrong-text { color: var(--wrong); font-weight: bold; }
+
+        /* --- Interactive Matching Styles (Part 2) --- */
+        .matching-game {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .col-terms, .col-defs {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 45%;
+        }
+        .match-btn {
+            background: #333;
+            border: 1px solid #555;
+            color: var(--parchment);
+            padding: 10px;
+            cursor: pointer;
+            text-align: center;
+            transition: 0.3s;
+            font-size: 0.95em;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 40px;
+        }
+        .match-btn.selected { background: var(--gold); color: black; }
+        .match-btn.matched { background: var(--correct); color: white; border-color: var(--correct); cursor: default; opacity: 0.7;}
+        .match-btn.error { animation: shake 0.5s; background: var(--wrong); }
+        @keyframes shake { 0% { transform: translateX(0); } 25% { transform: translateX(-5px); } 50% { transform: translateX(5px); } 75% { transform: translateX(-5px); } 100% { transform: translateX(0); } }
+
+        /* --- Song Ordering Styles --- */
+        .draggable-list {
+            list-style: none;
+            padding: 0;
+            text-align: left;
+            margin: 20px auto;
+            width: 80%;
+        }
+        .draggable-list li {
+            background: #333;
+            margin: 5px;
+            padding: 15px;
+            cursor: pointer;
+            border: 1px solid #555;
+            transition: 0.3s;
+        }
+        .draggable-list li.selected {
+            background: var(--gold);
+            color: black;
+            transform: scale(1.02);
+        }
+
+        /* --- QUIZ STYLES (Stage 6) --- */
+        .quiz-container {
+            background: rgba(0,0,0,0.3);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px auto;
+            max-width: 600px;
+        }
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .quiz-btn {
+            background: #222;
+            border: 1px solid var(--gold);
+            color: var(--parchment);
+            padding: 12px;
+            text-align: left;
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: 'Lato', sans-serif;
+        }
+        .quiz-btn:hover { background: #333; }
+        .quiz-btn.correct-ans { background: var(--correct) !important; color: white !important; }
+        .quiz-btn.wrong-ans { background: var(--wrong) !important; color: white !important; }
+
+
+        /* --- Festive Transformation Mode --- */
+        body.festive-mode {
+            background-image: url('https://www.transparenttextures.com/patterns/stardust.png'), linear-gradient(to bottom, #0f2027, #203a43, #2c5364);
+        }
+        .festive-mode .container {
+            border-color: #ff3333;
+            box-shadow: 0 0 30px #ff3333;
+        }
+
+        /* --- Footer Styles --- */
+        footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: var(--footer-height);
+            background: rgba(0, 0, 0, 0.9);
+            border-top: 2px solid var(--gold);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Cinzel', serif;
+            font-size: 0.9em;
+            color: var(--gold);
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+
+<audio id="theme-audio" src="theme.mp3" preload="auto" loop></audio>
+
+<div class="container">
+    
+    <div id="stage-0" class="fade-in">
+        <h1>🎄 Christmas at Hogwarts 🎄</h1>
+        <h2 style="color: var(--parchment)">The Keeper's Quest</h2>
+        <p style="font-size: 1.2em;">The Christmas Keeper has vanished, and the castle is losing its festive magic!</p>
+        <p>You must complete the magical tasks to find the Keeper and restore the holiday spirit.</p>
+        <button class="btn" style="margin-top: 30px;" onclick="startAdventure()">Enter the Great Hall</button>
+    </div>
+
+    <div id="stage-1" class="hidden fade-in content-stage">
+        <h2>Part 1: The Gathering</h2>
+        <p>Before we begin, discuss with your class: <strong>What is the best Christmas tradition?</strong></p>
+        <hr style="border-color: #555; width: 50%;">
+        <h3>Choose your Companion</h3>
+        <p>Who will help you on this quest?</p>
+        <div class="card-container">
+            <div class="companion-card" onclick="selectCompanion('Hermione')">
+                <img src="hermione.png" alt="Hermione" class="companion-img">
+                <h3>Hermione</h3>
+                <p>Knowledge & Logic</p>
+            </div>
+            <div class="companion-card" onclick="selectCompanion('Ron')">
+                <img src="ron.png" alt="Ron" class="companion-img">
+                <h3>Ron</h3>
+                <p>Loyalty & Humor</p>
+            </div>
+            <div class="companion-card" onclick="selectCompanion('Harry')">
+                <img src="harry.png" alt="Harry" class="companion-img">
+                <h3>Harry</h3>
+                <p>Courage & Spirit</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="stage-2" class="hidden fade-in content-stage">
+        <h2>Part 2: Charms Class</h2>
+        <div id="spell-section">
+            <p>It's too dark to see the definitions. Cast the light spell.</p>
+            <input type="text" id="spell-input" placeholder="Type spell here...">
+            <br>
+            <div style="display: flex; justify-content: center; gap: 10px; align-items: center;">
+                <button id="cast-btn" class="btn" onclick="checkSpell()">Cast Spell</button>
+                <button id="hint-btn" class="btn hint-btn" onclick="giveSpellHint()">Need a hint?</button>
+            </div>
+        </div>
+        
+        <div id="vocab-reveal" class="hidden">
+            <h3>The path is lit!</h3>
+            <p>Match the 6 Christmas terms with their definitions.</p>
+            <p><em>Click a term on the left, then its definition on the right.</em></p>
+            
+            <div class="matching-game">
+                <div class="col-terms">
+                    <div class="match-btn term" onclick="selectTerm(this, 'Bauble')">Bauble</div>
+                    <div class="match-btn term" onclick="selectTerm(this, 'Feast')">Feast</div>
+                    <div class="match-btn term" onclick="selectTerm(this, 'Cracker')">Cracker</div>
+                    <div class="match-btn term" onclick="selectTerm(this, 'Tinsel')">Tinsel</div>
+                    <div class="match-btn term" onclick="selectTerm(this, 'Sleigh')">Sleigh</div>
+                    <div class="match-btn term" onclick="selectTerm(this, 'Mistletoe')">Mistletoe</div>
+                </div>
+                <div class="col-defs">
+                    <div class="match-btn def" onclick="selectDef(this, 'Sleigh')">A vehicle pulled by horses or reindeer over snow.</div>
+                    <div class="match-btn def" onclick="selectDef(this, 'Feast')">A large, special meal for many people.</div>
+                    <div class="match-btn def" onclick="selectDef(this, 'Mistletoe')">A plant people kiss under at Christmas.</div>
+                    <div class="match-btn def" onclick="selectDef(this, 'Bauble')">A shiny ball used to decorate a tree.</div>
+                    <div class="match-btn def" onclick="selectDef(this, 'Tinsel')">Shiny strips of material used for decoration.</div>
+                    <div class="match-btn def" onclick="selectDef(this, 'Cracker')">A paper tube that bangs when pulled.</div>
+                </div>
+            </div>
+            <br>
+            <button id="vocab-next-btn" class="btn hidden" onclick="nextStage(3)">Go to the Common Room</button>
+        </div>
+    </div>
+
+    <div id="stage-3" class="hidden fade-in content-stage">
+        <h2>Part 3: The Common Room Riddles</h2>
+        <p>The portrait won't let you pass until you solve 5 riddles.</p>
+        <p id="riddle-progress" style="color: var(--gold);">Riddle 1/5</p>
+        
+        <div id="riddle-container" style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 10px; margin: 20px;">
+            <p id="riddle-text" style="font-style: italic; font-size: 1.1em;"></p>
+        </div>
+        
+        <div id="riddle-options" class="card-container">
+            </div>
+        <p id="riddle-feedback" style="height: 30px;"></p>
+    </div>
+
+    <div id="stage-4" class="hidden fade-in content-stage">
+        <h2>Part 4: Potions & Secrets</h2>
+        <p>The Keeper left a scrambled message. You must brew 3 potion layers to reveal it.</p>
+        <div style="background:var(--parchment); color:black; padding:10px; font-family:'Courier New'; font-weight:bold; margin:10px auto; width: 50%; transform: rotate(-2deg);">
+            SECRET LOCATION HIDDEN
+        </div>
+        <p>Add the ingredients in the correct Adjective Order.</p>
+        
+        <p id="potion-progress" style="color: var(--gold); font-weight: bold;">Potion Layer 1/3</p>
+
+        <div id="potion-options" class="card-container">
+            </div>
+
+        <div style="margin-top: 20px; font-size: 1.2em; color: var(--gold);">
+            <p id="potion-status">Cauldron: [ Empty ]</p>
+        </div>
+    </div>
+
+    <div id="stage-5" class="hidden fade-in content-stage">
+        <h2>Part 5: The Festive Buzz</h2>
+        <p>You found the Keeper! To restore the final magic, put the lyrics of <em>'Jingle Bells'</em> in order.</p>
+        <p><em>Click the lines in the correct sequence.</em></p>
+        <ul id="lyrics-list" class="draggable-list">
+            <li onclick="orderLyric(this)">Laughing all the way</li>
+            <li onclick="orderLyric(this)">Dashing through the snow</li>
+            <li onclick="orderLyric(this)">O'er the fields we go</li>
+            <li onclick="orderLyric(this)">In a one-horse open sleigh</li>
+        </ul>
+        <p id="song-feedback" style="height: 30px;"></p>
+        <button id="final-spell-btn" class="btn hidden" style="font-size: 1.3em;" onclick="nextStage(6)">Go to the Library Challenge</button>
+    </div>
+
+    <div id="stage-6" class="hidden fade-in content-stage">
+        <h2>Part 6: The Library Challenge</h2>
+        <p>The Keeper needs to verify your knowledge of the past before the final magic can be cast.</p>
+        <p>Choose the correct narrative tense to complete the sentences.</p>
+        
+        <p id="quiz-progress" style="color: var(--gold);">Question 1/10</p>
+
+        <div class="quiz-container">
+            <p id="quiz-question" style="font-size: 1.2em; margin-bottom: 20px;"></p>
+            <div id="quiz-options-container" class="quiz-options">
+                </div>
+        </div>
+        <p id="quiz-feedback" style="height: 30px; font-weight: bold;"></p>
+        <button id="quiz-next-btn" class="btn hidden" onclick="loadNextQuizQuestion()">Next Question</button>
+    </div>
+
+
+    <div id="stage-7" class="hidden fade-in">
+        <h1>🎄 Hogwarts is Saved! 🎄</h1>
+        <p style="font-size: 1.5em; text-shadow: 2px 2px 4px black;">You have restored the magic!</p>
+        <div style="background: rgba(0,0,0,0.7); padding: 20px; border-radius: 15px; margin-top: 30px;">
+            <p><strong>Your Reward:</strong> Ask your teacher for the secret Christmas Sweets!</p>
+            <p><em>Merry Christmas!</em></p>
+            <button class="btn" onclick="location.reload()">Replay Mission</button>
+        </div>
+    </div>
+
+</div>
+
+<footer>
+    🎄✍ Created by Panagiotis Domvros, English and Drama Teacher, All Rights Reserved ✍🎅
+</footer>
+
+<script>
+    // --- AUDIO HANDLING (NEW) ---
+    function startAdventure() {
+        const themeAudio = document.getElementById('theme-audio');
+        // User interaction allows this play call to work
+        themeAudio.play().catch(error => {
+            console.log("Audio play failed. Ensure theme.mp3 is present.");
+        });
+        nextStage(1);
+    }
+
+    function stopMusic() {
+        const themeAudio = document.getElementById('theme-audio');
+        themeAudio.pause();
+        themeAudio.currentTime = 0; // Reset to start
+    }
+
+
+    // --- GLOBAL VARIABLES ---
+    let currentStage = 0;
+    let songClickCount = 0;
+    
+    // Matching Game Variables
+    let selectedTermBtn = null;
+    let matchesFound = 0;
+    const totalMatches = 6; 
+
+    // --- NAVIGATION ---
+    function nextStage(num) {
+        const current = document.getElementById(`stage-${currentStage}`);
+        if(current) current.classList.add('hidden');
+        
+        const next = document.getElementById(`stage-${num}`);
+        if(next) next.classList.remove('hidden');
+        
+        currentStage = num;
+
+        // Load specific stage data
+        if(currentStage === 3) loadRiddle();
+        if(currentStage === 4) loadPotionSet();
+        if(currentStage === 6) loadNextQuizQuestion();
+        if(currentStage === 7) transformHogwartsFinal();
+    }
+
+    // --- STAGE 1: COMPANION (UPDATED TO STOP MUSIC) ---
+    function selectCompanion(name) {
+        stopMusic(); // Stop the music when a companion is chosen
+        alert(`${name} has joined your party!`);
+        nextStage(2);
+    }
+
+    // --- STAGE 2: SPELL & HINT ---
+    function giveSpellHint() { alert("Try the spell for light: LUMOS"); }
+
+    function checkSpell() {
+        const input = document.getElementById('spell-input').value.toUpperCase().trim();
+        if (input === 'LUMOS') {
+            document.getElementById('spell-section').classList.add('hidden');
+            document.getElementById('vocab-reveal').classList.remove('hidden');
+             alert("Spell cast successfully! The words are revealed.");
+        } else {
+            alert('Fizzle... nothing happened. Try again!');
+        }
+    }
+
+    // --- STAGE 2: MATCHING LOGIC ---
+    function selectTerm(btn, termId) {
+        if (btn.classList.contains('matched')) return;
+        if (selectedTermBtn) selectedTermBtn.classList.remove('selected');
+        btn.classList.add('selected');
+        selectedTermBtn = btn;
+        selectedTermBtn.dataset.term = termId;
+    }
+
+    function selectDef(btn, defId) {
+        if (btn.classList.contains('matched')) return;
+        if (!selectedTermBtn) { alert("Select a term on the left first."); return; }
+        if (selectedTermBtn.dataset.term === defId) {
+            btn.classList.add('matched');
+            selectedTermBtn.classList.add('matched');
+            selectedTermBtn.classList.remove('selected');
+            selectedTermBtn = null;
+            matchesFound++;
+            if(matchesFound === totalMatches) document.getElementById('vocab-next-btn').classList.remove('hidden');
+        } else {
+            btn.classList.add('error');
+            selectedTermBtn.classList.add('error');
+            setTimeout(() => {
+                btn.classList.remove('error');
+                selectedTermBtn.classList.remove('error', 'selected');
+                selectedTermBtn = null;
+            }, 500);
+        }
+    }
+
+
+    // --- STAGE 3: 5 RIDDLES ---
+    const riddles = [
+        { q: "I have needles but cannot sew. I have a skirt but no legs. What am I?", a: "Christmas Tree", choices: ["Santa Claus", "A Gift", "Christmas Tree"] },
+        { q: "I drop from the sky, I'm much like a star. I'm cold to the touch, and seen from afar. What am I?", a: "Snowflake", choices: ["Raindrop", "Snowflake", "Icicle"] },
+        { q: "I have a red nose, but I don't have a cold. I help pull a sleigh, or so I am told. Who am I?", a: "Rudolph", choices: ["Rudolph", "An Elf", "A Reindeer"] },
+        { q: "You hang me up by the chimney with care, in hopes that St. Nicholas soon will be there. What am I?", a: "Stocking", choices: ["Wreath", "Stocking", "Hat"] },
+        { q: "I'm made of sweet ginger and spice. They usually cut me in the shape of a man. What am I?", a: "Gingerbread Man", choices: ["Candy Cane", "Fruitcake", "Gingerbread Man"] }
+    ];
+    let currentRiddleIndex = 0;
+
+    function loadRiddle() {
+        if (currentRiddleIndex >= riddles.length) { nextStage(4); return; }
+        const riddle = riddles[currentRiddleIndex];
+        document.getElementById('riddle-progress').innerText = `Riddle ${currentRiddleIndex + 1}/${riddles.length}`;
+        document.getElementById('riddle-text').innerText = `"${riddle.q}"`;
+        const optionsContainer = document.getElementById('riddle-options');
+        optionsContainer.innerHTML = ''; 
+        riddle.choices.forEach(choice => {
+            const btn = document.createElement('button');
+            btn.innerText = choice; btn.className = 'btn';
+            btn.onclick = () => checkRiddle(choice);
+            optionsContainer.appendChild(btn);
+        });
+    }
+
+    function checkRiddle(answer) {
+        const feedback = document.getElementById('riddle-feedback');
+        if (answer === riddles[currentRiddleIndex].a) {
+            feedback.innerHTML = '<span class="correct-text">Correct! Next riddle...</span>';
+            currentRiddleIndex++;
+            setTimeout(() => { feedback.innerHTML = ''; loadRiddle(); }, 1000);
+        } else { feedback.innerHTML = '<span class="wrong-text">Incorrect. Try again.</span>'; }
+    }
+
+
+    // --- STAGE 4: POTIONS (3 SETS) ---
+    let potionIngredients = [];
+    let currentPotionSetIndex = 0;
+    
+    const potionSets = [
+        { correct: ['Beautiful', 'Red', 'Berry'], shuffled: ['Red', 'Berry', 'Beautiful'] },
+        { correct: ['Tiny', 'Golden', 'Bells'], shuffled: ['Bells', 'Tiny', 'Golden'] },
+        { correct: ['Dusty', 'Old', 'Book'], shuffled: ['Old', 'Book', 'Dusty'] }
+    ];
+
+    function loadPotionSet() {
+        if (currentPotionSetIndex >= potionSets.length) {
+            alert('Potion complete! Smoke forms the words: THE ASTRONOMY TOWER');
+            nextStage(5); return;
+        }
+        potionIngredients = [];
+        document.getElementById('potion-status').innerText = "Cauldron: [ Empty ]";
+        document.getElementById('potion-progress').innerText = `Potion Layer ${currentPotionSetIndex + 1}/${potionSets.length}`;
+        
+        const optionsContainer = document.getElementById('potion-options');
+        optionsContainer.innerHTML = '';
+        potionSets[currentPotionSetIndex].shuffled.forEach(ing => {
+            const btn = document.createElement('button');
+            btn.innerText = ing; btn.className = 'btn';
+            btn.onclick = () => addIngredient(ing);
+            optionsContainer.appendChild(btn);
+        });
+    }
+
+    function addIngredient(ing) {
+        potionIngredients.push(ing);
+        document.getElementById('potion-status').innerText = "Cauldron: [ " + potionIngredients.join(" + ") + " ]";
+        
+        const currentSetStr = potionIngredients.join(' ');
+        const correctStr = potionSets[currentPotionSetIndex].correct.join(' ');
+
+        if (potionIngredients.length === 3) {
+            setTimeout(() => {
+                if (currentSetStr === correctStr) {
+                    alert('Layer complete! Adding next ingredients...');
+                    currentPotionSetIndex++;
+                    loadPotionSet();
+                } else {
+                    alert('BOOM! The potion exploded. Wrong order!');
+                    potionIngredients = [];
+                    document.getElementById('potion-status').innerText = "Cauldron: [ Empty ]";
+                }
+            }, 500);
+        }
+    }
+
+
+    // --- STAGE 5: SONG ORDERING (Jingle Bells) ---
+    function orderLyric(element) {
+        const validOrder = ["Dashing through the snow", "In a one-horse open sleigh", "O'er the fields we go", "Laughing all the way"];
+        if (element.classList.contains('selected')) return;
+        if (element.innerText.includes(validOrder[songClickCount])) {
+            element.classList.add('selected'); songClickCount++;
+            if (songClickCount === 4) {
+                document.getElementById('song-feedback').innerHTML = '<span class="correct-text" style="font-size:1.2em">🎶 Jingle all the way! The magic is restored! 🎶</span>';
+                document.getElementById('final-spell-btn').classList.remove('hidden');
+            }
+        } else {
+            alert(`Oops! That's not the next line. Start with: "${validOrder[0]}"`);
+            songClickCount = 0; document.querySelectorAll('#lyrics-list li').forEach(li => li.classList.remove('selected'));
+        }
+    }
+
+    // --- STAGE 6: NARRATIVE TENSES QUIZ ---
+    const narrativeQuestions = [
+        { q: "While Harry was flying, he ___ the Golden Snitch.", options: ["see", "saw", "was seeing"], a: 1 },
+        { q: "By the time they arrived at the feast, Dumbledore ___ speaking.", options: ["finished", "has finished", "had finished"], a: 2 },
+        { q: "Ron ___ his homework when Hermione came in.", options: ["did", "was doing", "had done"], a: 1 },
+        { q: "Snape was angry because someone ___ his ingredients.", options: ["stole", "was stealing", "had stolen"], a: 2 },
+        { q: "They ___ to Hagrid's hut yesterday afternoon.", options: ["walked", "were walking", "have walked"], a: 0 },
+        { q: "The sun ___ as they entered the Forbidden Forest.", options: ["set", "was setting", "had set"], a: 1 },
+        { q: "Harry realized he ___ his wand in the dormitory.", options: ["left", "was leaving", "had left"], a: 2 },
+        { q: "While the others ___, Neville was looking for Trevor.", options: ["slept", "were sleeping", "had slept"], a: 1 },
+        { q: "Before he came to Hogwarts, Harry ___ anything about magic.", options: ["didn't know", "wasn't knowing", "hadn't known"], a: 2 },
+        { q: "The boggart ___ into a giant spider right in front of Ron.", options: ["turned", "was turning", "had turned"], a: 0 }
+    ];
+    let quizIndex = 0;
+    let quizScore = 0;
+
+    function loadNextQuizQuestion() {
+        document.getElementById('quiz-feedback').innerHTML = '';
+        document.getElementById('quiz-next-btn').classList.add('hidden');
+        document.getElementById('quiz-options-container').classList.remove('disabled');
+
+        if (quizIndex >= narrativeQuestions.length) {
+            finishQuiz();
+            return;
+        }
+
+        const qData = narrativeQuestions[quizIndex];
+        document.getElementById('quiz-progress').innerText = `Question ${quizIndex + 1}/10`;
+        document.getElementById('quiz-question').innerText = qData.q;
+        
+        const container = document.getElementById('quiz-options-container');
+        container.innerHTML = '';
+        qData.options.forEach((opt, index) => {
+            const btn = document.createElement('button');
+            btn.className = 'quiz-btn';
+            btn.innerText = opt;
+            btn.onclick = () => checkQuizAnswer(btn, index, qData.a);
+            container.appendChild(btn);
+        });
+    }
+
+    function checkQuizAnswer(selectedBtn, selectedIndex, correctIndex) {
+        const options = document.querySelectorAll('.quiz-btn');
+        document.getElementById('quiz-options-container').classList.add('disabled');
+
+        if (selectedIndex === correctIndex) {
+            selectedBtn.classList.add('correct-ans');
+            document.getElementById('quiz-feedback').innerHTML = '<span class="correct-text">Correct!</span>';
+            quizScore++;
+        } else {
+            selectedBtn.classList.add('wrong-ans');
+            options[correctIndex].classList.add('correct-ans');
+            document.getElementById('quiz-feedback').innerHTML = '<span class="wrong-text">Incorrect.</span>';
+        }
+        
+        quizIndex++;
+        document.getElementById('quiz-next-btn').classList.remove('hidden');
+    }
+
+    function finishQuiz() {
+        const container = document.getElementById('stage-6');
+        if (quizScore >= 7) {
+            container.innerHTML = `<h2>Challenge Complete!</h2><p>You scored ${quizScore}/10.</p><p>Your knowledge of the past has secured the future!</p><button class="btn" onclick="nextStage(7)">✨ Cast Final Spell ✨</button>`;
+        } else {
+            container.innerHTML = `<h2>Challenge Failed</h2><p>You scored ${quizScore}/10.</p><p>The Keeper needs you to study the past more carefully.</p><button class="btn" onclick="location.reload()">Try Again</button>`;
+        }
+    }
+
+    // --- FINAL TRANSFORMATION (STAGE 7) ---
+    function transformHogwartsFinal() {
+        document.body.classList.add('festive-mode');
+        document.getElementById('stage-7').style.backgroundImage = "url('image_2.png')";
+    }
+</script>
+
+</body>
+</html>
